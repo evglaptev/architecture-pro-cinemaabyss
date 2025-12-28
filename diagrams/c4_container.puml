@@ -1,0 +1,70 @@
+@startuml C4_Container_CinemaAbyss
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Пользователь", "Зритель онлайн-кинотеатра")
+
+Container_Boundary(cinema_abyss, "Кинобездна") {
+    Container(smart_tv, "Smart TV Application", "JavaScript", "Приложение Smart-TV")
+    Container(web_app, "Web Application", "JavaScript", "Web-приложение")
+    Container(mobile_app, "Mobile Application", "Kotlin", "Приложение на смартфоне")
+
+    Container(api_gateway, "API Gateway", "Go", "Единая точка входа, маршрутизация и аутентификация")
+    
+    Container(users_service, "Users Service", "Go", "Управление профилями пользователей")
+    Container(movies_service, "Movies Service", "Go", "Каталог и метаданные фильмов")
+    Container(subscriptions_service, "Subscriptions Service", "Go", "Управление подписками")
+    Container(payments_service, "Payments Service", "Go", "Обработка платежей")
+    Container(content_sync_service, "Content Sync Service", "Go", "Синхронизация контента с онлайн-кинотеатрами")
+    Container(recommend_service, "Recommendation Service", "Go", "Прием статистики просмотров и рейтингов по обезличенным данным")
+
+    Container(kafka, "Kafka", "Брокер сообщений", "Асинхронная коммуникация между сервисами")
+
+    Container(rabbitmq, "RabbitMQ", "Брокер сообщений", "Асинхронная коммуникация между сервисами")
+    
+    ContainerDb(users_db, "Users Database", "PostgreSQL", "Хранение данных пользователей")
+    ContainerDb(movies_db, "Movies Database", "MongoDB", "Хранение каталога и метаданных фильмов")
+    ContainerDb(subscriptions_db, "Subscriptions Database", "PostgreSQL", "Хранение информации о подписках")
+    ContainerDb(payments_db, "Payments Database", "PostgreSQL", "Хранение транзакций")
+    
+    Container(s3_storage, "S3 Storage", "Minio/AWS S3", "Хранение медиаконтента и файлов")
+}
+
+Container(external_recommendation, "Внешняя рекомендательная система", "ML/AI", "Персонализированные рекомендации")
+Container(online_cinemas, "Онлайн-кинотеатры", "Внешние API", "Источники контента")
+
+Rel(user, mobile_app, "Использует")
+Rel(user, smart_tv, "Использует")
+Rel(user, web_app, "Использует")
+
+Rel(mobile_app, api_gateway, "Вызов API")
+Rel(smart_tv, api_gateway, "Вызов API")
+Rel(web_app, api_gateway, "Вызов API")
+
+Rel(api_gateway, users_service, "Маршрутизация")
+Rel(api_gateway, movies_service, "Маршрутизация")
+Rel(api_gateway, subscriptions_service, "Маршрутизация")
+Rel(api_gateway, payments_service, "Маршрутизация")
+Rel(api_gateway, recommend_service, "Маршрутизация")
+
+Rel(users_service, users_db, "Чтение/Запись")
+Rel(movies_service, movies_db, "Чтение/Запись")
+Rel(subscriptions_service, subscriptions_db, "Чтение/Запись")
+Rel(payments_service, payments_db, "Чтение/Запись")
+
+Rel(users_service, kafka, "Публикует события")
+Rel(movies_service, kafka, "Публикует события")
+Rel(subscriptions_service, kafka, "Публикует события")
+Rel(payments_service, kafka, "Публикует события")
+Rel(recommend_service, kafka, "Слушает события")
+
+Rel(recommend_service, rabbitmq, "Публикует события")
+Rel(rabbitmq, external_recommendation, "Коммуникация с внешним сервисом рекомендаций")
+
+Rel(content_sync_service, online_cinemas, "Получение контента")
+Rel(content_sync_service, movies_service, "Обновление каталога")
+Rel(content_sync_service, s3_storage, "Загрузка медиафайлов")
+
+Rel(movies_service, s3_storage, "Управление медиаконтентом")
+
+@enduml
