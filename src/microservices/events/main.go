@@ -67,7 +67,7 @@ func main() {
 		log.Fatalf("Server forced to shutdown: %v\n", err)
 	}
 
-	log.Println("Server exited properly")
+	log.Println("Server exited properly.")
 }
 
 // getEnv gets an environment variable or returns a default value 
